@@ -29,9 +29,9 @@ def napari_get_reader(path):
         path = path[0]
 
     # if we know we cannot read the file, we immediately return None.
-    if not path.endswith(".npy"):
+    if not path.endswith(".obj") and not path.endswith(".ply"):
         return None
-
+    print("Found reader")
     # otherwise we return the *function* that can read ``path``.
     return reader_function
 
@@ -58,15 +58,27 @@ def reader_function(path):
         layer. Both "meta", and "layer_type" are optional. napari will
         default to layer_type=="image" if not provided
     """
+    import pymeshlab
     # handle both a string and a list of strings
     paths = [path] if isinstance(path, str) else path
     # load all files into array
-    arrays = [np.load(_path) for _path in paths]
-    # stack arrays into single array
-    data = np.squeeze(np.stack(arrays))
+    ms = pymeshlab.MeshSet()
+    for _path in paths:
+        ms.load_new_mesh(_path)
+    # pack all meshes in one array
+    index = 0
+    v_matrix = ms[0].vertex_matrix()
+    f_matrix = ms[0].face_matrix()
+    values = np.array([index+1] * len(v_matrix))
+    for mesh in ms:
+        if (index>0):
+            v_matrix = np.concatenate(v_matrix, mesh.vertex_matrix())
+            f_matrix = np.concatenate(f_matrix, mesh.face_matrix())
+            values = np.concatenate(values, np.array([index+1] * len(v_matrix)))
+        index = index + 1
 
     # optional kwargs for the corresponding viewer.add_* method
     add_kwargs = {}
-
-    layer_type = "image"  # optional, default is "image"
+    data = (v_matrix, f_matrix, values)
+    layer_type = "surface"
     return [(data, add_kwargs, layer_type)]
