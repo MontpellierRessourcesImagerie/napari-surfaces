@@ -2,6 +2,9 @@ name: napari-surfaces
 display_name: napari surfaces
 contributions:
   commands:
+    - id: napari-surfaces.create
+      title: Create an ISO-surface from a layer
+      python_name: napari_surfaces._layermenu:create_iso_surface
     - id: napari-surfaces.get_reader
       python_name: napari_surfaces._reader:napari_get_reader
       title: Open data with napari surfaces
@@ -46,3 +49,12 @@ contributions:
     - command: napari-surfaces.make_func_widget
       autogenerate: true
       display_name: Example Function Widget
+  menus:
+    napari/layers/context: 
+      - submenu: hello_world
+      - command: napari-surfaces.create
+    hello_world:
+      - command: napari-surfaces.create
+  submenus:
+    - id: hello_world
+      label: Say hello to the world

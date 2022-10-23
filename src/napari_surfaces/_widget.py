@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING
 
 from magicgui import magic_factory
 from qtpy.QtWidgets import QHBoxLayout, QPushButton, QWidget
-
 if TYPE_CHECKING:
     import napari
 
@@ -24,14 +23,17 @@ class ExampleQWidget(QWidget):
         super().__init__()
         self.viewer = napari_viewer
 
-        btn = QPushButton("Click me!")
+        btn = QPushButton("Create Surface")
         btn.clicked.connect(self._on_click)
 
         self.setLayout(QHBoxLayout())
         self.layout().addWidget(btn)
 
     def _on_click(self):
-        print("napari has", len(self.viewer.layers), "layers")
+        from napari_surfaces import SurfaceTool
+
+        sft = SurfaceTool(self.viewer)
+        sft.createSurface()
 
 
 @magic_factory
